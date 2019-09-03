@@ -19,6 +19,10 @@ contract fundRaising{
     
     Request[] public requests;
     
+    event ContributeEvent(address sender, uint value);
+    event CreateRequestEvent(string _description, address _recipient, uint value);
+    event MakePaymentEvent(address recipient, uint value);    
+    
     uint public raisedAmount = 0;
     
     constructor(uint _goal, uint _deadline) public {
@@ -32,8 +36,7 @@ contract fundRaising{
     modifier onlyAdmin(){
         require(msg.sender == fundAdmin);
         _;
-    }
-    
+    }    
     
     function contribute() public payable{
         require(now < deadline);
@@ -45,6 +48,8 @@ contract fundRaising{
         
         contributers[msg.sender] += msg.value;
         raisedAmount += msg.value;
+        
+        emit ContributeEvent(msg.sender, msg.value);
     }
     
     function getBalance() public view returns(uint){
@@ -72,6 +77,8 @@ contract fundRaising{
         });
         
         requests.push(newRequest);
+        
+        emit CreateRequestEvent(_description, _recipient, _value);
     }
     
     function voteRequest(uint index) public {
@@ -90,6 +97,8 @@ contract fundRaising{
         thisRequest.recipient.transfer(thisRequest.value);
         
         thisRequest.completed = true;
+        
+        emit MakePaymentEvent(thisRequest.recipient, thisRequest.value);
         
     }
     
